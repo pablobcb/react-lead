@@ -1,26 +1,24 @@
 import React, { Component } from 'react'
-import R from 'ramda'
 import Key from './Key'
+import Immutable from 'immutable'
 
 
 export default class Keyboard extends Component {
   constructor(props) {
       super(props)
 
-      this.pianoKeysOnKeyboard = ['a', 'w', 's', 'e',
-        'd','f', 't', 'g', 'y', 'h','u', 'j', 'k', 'o', 'l', 'p']
+      this.pianoKeysOnKeyboard = Immutable.Set.of('a', 'w', 's', 'e',
+        'd','f', 't', 'g', 'y', 'h','u', 'j', 'k', 'o', 'l', 'p')
 
-      this.allowedKeyboardKeys = R.concat(
-        this.pianoKeysOnKeyboard, 
-        ['z', 'c', 'x', 'v']
-      )
+      this.allowedKeyboardKeys = 
+        this.pianoKeysOnKeyboard.union(Immutable.Set.of('z', 'c', 'x', 'v'))
 
-      this.unusedKeysOnLastOctave = ['h','u', 'j', 'k', 'o', 'l', 'p']
+      this.unusedKeysOnLastOctave = Immutable.Set.of('h','u', 'j', 'k', 'o', 'l', 'p')
 
       this.state = {
         velocity         : 100,
         octave           : 3,
-        pressedKeys      : [],
+        pressedKeys      : Immutable.Set(),
         mousePressedNote : null,
         isMouseCliked    : false
       }
@@ -33,12 +31,12 @@ export default class Keyboard extends Component {
     const symbol = String.fromCharCode(event.keyCode).toLowerCase()
 
 
-    const isAllowedInput = R.contains(symbol, this.allowedKeyboardKeys)
+    const isAllowedInput = this.allowedKeyboardKeys.contains(symbol)
     const isLastOctave   = this.state.octave == 8
     const isUnusedKey    = isLastOctave 
-      && R.contains(symbol, this.unusedKeysOnLastOctave)
+      && this.unusedKeysOnLastOctave.contains(symbol)
 
-    if((! isAllowedInput) || isUnusedKey || R.contains(symbol, this.state.pressedKeys))
+    if((! isAllowedInput) || isUnusedKey || this.state.pressedKeys.contains(symbol))
       return
 
     this.addPressedKey(symbol)
@@ -61,18 +59,17 @@ export default class Keyboard extends Component {
     const symbol = String.fromCharCode(event.keyCode).toLowerCase()
 
     this.setState({
-      pressedKeys : R.filter( s => (s != symbol) , this.state.pressedKeys)
+      pressedKeys : this.state.pressedKeys.filter( s => s !== symbol )
     })
 
-    if(! R.contains(symbol, this.pianoKeysOnKeyboard))
+    if(! this.pianoKeysOnKeyboard.contains(symbol))
       return
 
     //keyOff
   }
 
   addPressedKey = symbol => {
-
-    this.setState({ pressedKeys : R.append(symbol, this.state.pressedKeys) })
+    this.setState({ pressedKeys : this.state.pressedKeys.add(symbol) })
   }
 
 
@@ -87,15 +84,12 @@ export default class Keyboard extends Component {
 
 
   render = () => {
-    const octaveKeys = [ 'c', 'cs', 'd', 'ds', 
-      'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b' ]
+    const octaveKeys = Immutable.List.of('c', 'cs', 'd', 'ds',
+      'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b')
 
-    const onScreenKeys = R.flatten(R.concat(
-      R.repeat(octaveKeys, 10),
-      R.take(octaveKeys, 8)
-    ))
+    const onScreenKeys =
+      Immutable.Repeat(octaveKeys, 10).flatten().concat(octaveKeys.take(8))
 
- 
     return (
       <div>
         <ul className='keyboard'> {

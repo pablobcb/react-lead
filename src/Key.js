@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import R from 'ramda'
 
 export default class Key extends Component {
 
@@ -18,7 +17,7 @@ export default class Key extends Component {
 
     return (
       <li 
-        className={ R.join(' ', classes) } 
+        className={ classes.join(' ', classes) } 
         value={ this.props.midiNote } 
       />
     )
