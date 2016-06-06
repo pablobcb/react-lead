@@ -50,7 +50,7 @@ export default class Keyboard extends Component {
         this.octaveUp()
         break
 
-      default:
+      //default:
       
     }
   }
